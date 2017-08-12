@@ -44,7 +44,7 @@ public class HelloWorldBuilderTest {
     }
 
     @Test
-    public void testPerform() throws Exception {
+    public void testFreeStyleProject() throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(builder);
         FreeStyleBuild completedBuild = jenkins.assertBuildStatusSuccess(project.scheduleBuild2(0));
@@ -53,7 +53,7 @@ public class HelloWorldBuilderTest {
     }
 
     @Test
-    public void testPerformDeclarativePipeline() throws Exception {
+    public void testDeclarativePipeline() throws Exception {
         String agentLabel = "my-agent";
         jenkins.createOnlineSlave(Label.get(agentLabel));
         WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-perform-pipeline");
@@ -75,7 +75,7 @@ public class HelloWorldBuilderTest {
     }
 
     @Test
-    public void testPerformScriptedPipeline() throws Exception {
+    public void testScriptedPipeline() throws Exception {
         String agentLabel = "my-agent";
         jenkins.createOnlineSlave(Label.get(agentLabel));
         WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-perform-pipeline");
@@ -90,7 +90,7 @@ public class HelloWorldBuilderTest {
     }
 
     @Test
-    public void testPerformScriptedPipelineUseSymbol() throws Exception {
+    public void testScriptedPipelineUseSymbol() throws Exception {
         String agentLabel = "my-agent";
         jenkins.createOnlineSlave(Label.get(agentLabel));
         WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-perform-pipeline");
@@ -121,6 +121,14 @@ public class HelloWorldBuilderTest {
         assertThat(descriptor.isApplicable(FreeStyleProject.class), is(true));
     }
 
+    /* Confirm job configuration is unharmed by a round trip through UI */
+    @Test
+    public void testJobConfigRoundTrip() throws Exception {
+        HelloWorldBuilder after = jenkins.configRoundtrip(builder);
+        jenkins.assertEqualDataBoundBeans(builder, after);
+    }
+
+    /* Confirm input checks for name field */
     @Test
     public void testDescriptorDoCheckname() throws Exception {
         BuildStepDescriptor<Builder> descriptor = builder.getDescriptor();
@@ -132,12 +140,5 @@ public class HelloWorldBuilderTest {
         assertThat(doCheckNameMethod.invoke(descriptor, "").toString(), is(FormValidation.error("Please set a name").toString()));
         // Appears that FormValidation does not implement equals()
         // assertThat(doCheckNameMethod.invoke(descriptor, "x"), is(FormValidation.warning("Isn't the name too short?")));
-    }
-
-    /* Test that the job configuration is unharmed by a round trip through UI */
-    @Test
-    public void testJobConfigRoundTrip() throws Exception {
-        HelloWorldBuilder after = jenkins.configRoundtrip(builder);
-        jenkins.assertEqualDataBoundBeans(builder, after);
     }
 }
