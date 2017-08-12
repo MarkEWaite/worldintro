@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.worldintro;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.Label;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -10,8 +11,10 @@ import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.isIn;
 import org.hamcrest.core.IsInstanceOf;
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Rule;
@@ -47,7 +50,37 @@ public class HelloWorldBuilderIT {
         project.getBuildersList().add(builder);
         FreeStyleBuild completedBuild = jenkins.assertBuildStatusSuccess(project.scheduleBuild2(0));
         String helloString = "Hello, " + name + "!";
-        assertThat(helloString, isIn(completedBuild.getLog(10)));
+        jenkins.assertLogContains(helloString, completedBuild);
+    }
+
+    @Test
+    public void testPerformPipeline() throws Exception {
+        String agentLabel = "my-agent";
+        jenkins.createOnlineSlave(Label.get(agentLabel));
+        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-perform-pipeline");
+        String pipelineScript
+                = "node {\n"
+                + "  step([$class: 'HelloWorldBuilder', name: '" + name + "'])"
+                + "}";
+        job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
+        WorkflowRun completedBuild = jenkins.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        String expectedString = "Hello, " + name + "!";
+        jenkins.assertLogContains(expectedString, completedBuild);
+    }
+
+    @Test
+    public void testPerformPipelineUseSymbol() throws Exception {
+        String agentLabel = "my-agent";
+        jenkins.createOnlineSlave(Label.get(agentLabel));
+        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-perform-pipeline");
+        String pipelineScript
+                = "node {\n"
+                + "  helloWorld '" + name + "'\n"
+                + "}";
+        job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
+        WorkflowRun completedBuild = jenkins.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        String expectedString = "Hello, " + name + "!";
+        jenkins.assertLogContains(expectedString, completedBuild);
     }
 
     @Test
