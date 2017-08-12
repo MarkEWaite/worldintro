@@ -16,6 +16,7 @@ import org.kohsuke.stapler.QueryParameter;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import org.jenkinsci.Symbol;
 
 /**
  * Sample {@link Builder}.
@@ -78,6 +79,7 @@ public class HelloWorldBuilder extends Builder implements SimpleBuildStep {
      * See {@code src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly}
      * for the actual HTML fragment for the configuration screen.
      */
+    @Symbol("helloWorld")
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
         /**
