@@ -1,10 +1,7 @@
 package org.jenkinsci.plugins.worldintro;
 
-import hudson.FilePath;
-import hudson.Launcher;
+import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -13,6 +10,7 @@ import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.isIn;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,13 +46,12 @@ public class HelloWorldBuilderIT {
     }
 
     @Test
-    public void testPerform() {
-        Run build = null;
-        FilePath workspace = null;
-        Launcher launcher = null;
-        TaskListener listener = null;
-        thrown.expect(NullPointerException.class);
-        builder.perform(build, workspace, launcher, listener);
+    public void testPerform() throws Exception {
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.getBuildersList().add(builder);
+        FreeStyleBuild completedBuild = jenkins.assertBuildStatusSuccess(project.scheduleBuild2(0));
+        String helloString = "Hello, " + name + "!";
+        assertThat(helloString, isIn(completedBuild.getLog(10)));
     }
 
     @Test
