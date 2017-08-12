@@ -15,7 +15,6 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Rule;
-import org.junit.rules.ExpectedException;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.WithoutJenkins;
 
@@ -23,9 +22,6 @@ public class HelloWorldBuilderIT {
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     public HelloWorldBuilderIT() {
     }
@@ -40,7 +36,7 @@ public class HelloWorldBuilderIT {
     }
 
     @Test
-    @WithoutJenkins
+    @WithoutJenkins // This test does not need the JenkinsRule instance
     public void testGetName() {
         assertThat(builder.getName(), is(name));
     }
