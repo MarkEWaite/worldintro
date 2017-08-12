@@ -53,7 +53,29 @@ public class HelloWorldBuilderTest {
     }
 
     @Test
-    public void testPerformPipeline() throws Exception {
+    public void testPerformDeclarativePipeline() throws Exception {
+        String agentLabel = "my-agent";
+        jenkins.createOnlineSlave(Label.get(agentLabel));
+        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-perform-pipeline");
+        String pipelineScript
+                = "pipeline {\n"
+                + "    agent any\n"
+                + "    stages {\n"
+                + "        stage('One') {\n"
+                + "            steps {\n"
+                + "                helloWorld '" + name + "'\n"
+                + "            }\n"
+                + "        }\n"
+                + "    }\n"
+                + "}";
+        job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
+        WorkflowRun completedBuild = jenkins.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        String expectedString = "Hello, " + name + "!";
+        jenkins.assertLogContains(expectedString, completedBuild);
+    }
+
+    @Test
+    public void testPerformScriptedPipeline() throws Exception {
         String agentLabel = "my-agent";
         jenkins.createOnlineSlave(Label.get(agentLabel));
         WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-perform-pipeline");
@@ -68,7 +90,7 @@ public class HelloWorldBuilderTest {
     }
 
     @Test
-    public void testPerformPipelineUseSymbol() throws Exception {
+    public void testPerformScriptedPipelineUseSymbol() throws Exception {
         String agentLabel = "my-agent";
         jenkins.createOnlineSlave(Label.get(agentLabel));
         WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-perform-pipeline");
