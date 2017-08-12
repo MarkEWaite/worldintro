@@ -29,14 +29,6 @@ public class HelloWorldBuilderIT {
     public HelloWorldBuilderIT() {
     }
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
     private HelloWorldBuilder builder = null;
     private String name = null;
 
@@ -44,10 +36,6 @@ public class HelloWorldBuilderIT {
     public void setUp() {
         name = "New name";
         builder = new HelloWorldBuilder(name);
-    }
-
-    @After
-    public void tearDown() {
     }
 
     @Test
