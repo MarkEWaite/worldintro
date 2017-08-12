@@ -2,17 +2,18 @@ package org.jenkinsci.plugins.worldintro;
 
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.FreeStyleProject;
+import hudson.model.Project;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
-import static org.hamcrest.CoreMatchers.is;
-import org.hamcrest.core.IsInstanceOf;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import hudson.tasks.Builder;
+
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import org.hamcrest.core.IsInstanceOf;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -59,4 +60,16 @@ public class HelloWorldBuilderIT {
         assertThat(builder.getDescriptor(), IsInstanceOf.instanceOf(BuildStepDescriptor.class));
     }
 
+    @Test
+    public void testDescriptorGetDisplayName() {
+        BuildStepDescriptor<Builder> descriptor = builder.getDescriptor();
+        assertThat(descriptor.getDisplayName(), is("Say hello world"));
+    }
+
+    @Test
+    public void testDescriptorIsApplicable() {
+        BuildStepDescriptor<Builder> descriptor = builder.getDescriptor();
+        assertThat(descriptor.isApplicable(FreeStyleProject.class), is(true));
+        assertThat(descriptor.isApplicable(Project.class), is(true));
+    }
 }
