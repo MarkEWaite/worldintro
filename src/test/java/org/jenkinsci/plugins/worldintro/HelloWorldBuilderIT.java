@@ -86,4 +86,11 @@ public class HelloWorldBuilderIT {
         // Appears that FormValidation does not implement equals()
         // assertThat(doCheckNameMethod.invoke(descriptor, "x"), is(FormValidation.warning("Isn't the name too short?")));
     }
+
+    /* Test that the job configuration is unharmed by a round trip through UI */
+    @Test
+    public void testJobConfigRoundTrip() throws Exception {
+        HelloWorldBuilder after = jenkins.configRoundtrip(builder);
+        jenkins.assertEqualDataBoundBeans(builder, after);
+    }
 }
