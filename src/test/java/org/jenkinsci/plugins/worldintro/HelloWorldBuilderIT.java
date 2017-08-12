@@ -3,11 +3,13 @@ package org.jenkinsci.plugins.worldintro;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.FreeStyleProject;
-import hudson.model.Project;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.FormValidation;
+import hudson.util.FormValidation.CheckMethod;
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -70,6 +72,18 @@ public class HelloWorldBuilderIT {
     public void testDescriptorIsApplicable() {
         BuildStepDescriptor<Builder> descriptor = builder.getDescriptor();
         assertThat(descriptor.isApplicable(FreeStyleProject.class), is(true));
-        assertThat(descriptor.isApplicable(Project.class), is(true));
+    }
+
+    @Test
+    public void testDescriptorDoCheckname() throws Exception {
+        BuildStepDescriptor<Builder> descriptor = builder.getDescriptor();
+        CheckMethod checkMethod = descriptor.getCheckMethod("name");
+        assertThat(checkMethod.getDependsOn(), is("")); // name field does not depend on any other field
+        Method doCheckNameMethod = descriptor.getClass().getDeclaredMethod("doCheckName", String.class);
+        assertThat(doCheckNameMethod.invoke(descriptor, "long name"), is(FormValidation.ok()));
+        assertThat(doCheckNameMethod.invoke(descriptor, "x").toString(), is(FormValidation.warning("Isn't the name too short?").toString()));
+        assertThat(doCheckNameMethod.invoke(descriptor, "").toString(), is(FormValidation.error("Please set a name").toString()));
+        // Appears that FormValidation does not implement equals()
+        // assertThat(doCheckNameMethod.invoke(descriptor, "x"), is(FormValidation.warning("Isn't the name too short?")));
     }
 }
