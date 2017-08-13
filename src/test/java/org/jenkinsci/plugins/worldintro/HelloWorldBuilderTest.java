@@ -104,6 +104,16 @@ public class HelloWorldBuilderTest {
         jenkins.assertLogContains(expectedString, completedBuild);
     }
 
+    /* Empty test so Netbeans 'Create/Update tests' does not recreate it */
+    @Test
+    @WithoutJenkins
+    public void testPerform() {
+        // Tested by testFreeStyleProject
+        // Tested by testDeclarativePipeline
+        // Tested by testScriptedPipeline
+        // Tested by testScriptedPipelineUseSymbol
+    }
+
     @Test
     public void testGetDescriptor() {
         assertThat(builder.getDescriptor(), IsInstanceOf.instanceOf(BuildStepDescriptor.class));
